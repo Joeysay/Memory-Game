@@ -116,3 +116,21 @@ h1 {
   padding-top: 200px;
 
 }
+
+.win li{
+  list-style: none;
+  display: inline-block;
+}
+.win h3{
+  margin: 0;
+}
+
+.win button{
+  height: 48px;
+  width: 150px;
+  background: #02ccba;
+  color: white;
+  margin: 1em;
+  font-size: 1em;
+  border: none;
+}

@@ -1,8 +1,4 @@
-let restart = document.querySelector('.restart');
-restart.onclick  = function(){
-  initGame();
-  reset();
-}
+
 /*
  * Create a list that holds all of your cards
  */
@@ -12,7 +8,7 @@ let moves = document.querySelector('.moves');
 let movesCounter = moves.textContent;
 
 function generateHTML(card){
-    return `<li class="card"><i class="fa ${card}"></i></li>`;
+    return `<li class="card" id="${card}" ><i class="fa ${card}"></i></li>`;
 }
 
 
@@ -48,84 +44,64 @@ function shuffle(array) {
     return array;
 }
 
+
 initGame();
 
-
-/*
- * set up the event listener for a card. If a card is clicked:
- *  - display the card's symbol (put this functionality in another function that you call from this one)
- *  - add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
- *  - if the list already has another card, check to see if the two cards match
- *    + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
- *    + if the cards do not match, remove the cards from the list and hide the card's symbol (put this functionality in another function that you call from this one)
- *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
- *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
- */
+let restart = document.querySelector('.restart');
+restart.onclick  = function(){
+  initGame();
+  reset();
+}
 
 
 let allCards = document.querySelectorAll('.card');
 let openCards = [];
 
-for (let card of allCards){
-    card.addEventListener('click', function(){
-    console.log('run click');
 
+function cardOnClick(){
+  for (let card of allCards){
+      card.addEventListener('click', function(){
 
-    //disabled the open and matched card
-    if(!card.classList.contains('open') && !card.classList.contains('show') && !card.classList.contains('match')){
+      //disabled the open and matched card
+      if(!card.classList.contains('open') && !card.classList.contains('show') && !card.classList.contains('match')){
 
-      //Show maximal two cards at at a time
-      cardShow(card);
-      openCards.push(card);
-      if(openCards.length <= 2){
+        //Show maximal two cards at at a time
+        cardShow(card);
 
-        //counting valid moves
-        movesCount();
-        console.log(movesCounter);
-
-        //if two cards with .show matched
-        let firstCard = openCards[0];
-        let secondCard = openCards[1];
-        let firstCardName = firstCard.querySelector('i').classList.item(1);
-        let secondCardName = secondCard.querySelector('i').classList.item(1);
-
-
-        if (firstCardName === secondCardName){
-          firstCard.classList.replace('show','match');
-          secondCard.classList.replace('show','match');
-          openCards = [];
-        } else {
-          // two cards not matched and then hide
-          setTimeout(function(){
-            for (let openCard of openCards){
-              cardHide(openCard);
-            }
+        if(openCards.length <=0 ){
+          openCards.push(card);
+          movesCount();
+        }else if(openCards.length <=1 && openCards.length>0){
+          //counting valid moves
+          openCards.push(card);
+          movesCount();
+          if (openCards[0].id === openCards[1].id){
+            openCards[0].classList.replace('show','match');
+            openCards[1].classList.replace('show','match');
             openCards = [];
-          }, 1000);
+          } else {
+            // two cards not matched and then hide
+            setTimeout(function(){
+              for (let openCard of openCards){
+                cardHide(openCard);
+              }
+              openCards = [];
+            }, 800);
+          }
+        } else {
+            cardHide(card);
         }
-      } else {
-          cardHide(card);
       }
-    }
 
-    //is all cards matched
-    isAlllMatched(card);
-  })
+      //is all cards matched
+      isAlllMatched(card);
+    })
+  }
+
 }
 
-function isAlllMatched(card){
-let numMatched = 0;
- for(let cards of allCards){
-   //if all cards are matched
-   if(cards.classList.contains('match')){
-     numMatched ++;}
-   }
-   console.log('number of mached cards ' + numMatched);
-   if(numMatched === 16){
-     setTimeout(function(){document.body.innerHTML = `<div class="win"><h1>Congrats, you just won the game in ${movesCounter} moves.</h1><p>/reflesh the page to restart/</p></div>`;},500);
+cardOnClick();
 
- }
-}
 
 
 
@@ -138,28 +114,28 @@ function cardHide(card){
 }
 
 
+//rating
 let star = document.querySelectorAll('.stars > li');
+let currentRate = document.querySelector('.stars').innerHTML;
 
 function movesCount(){
   movesCounter ++;
-  moves.textContent = movesCounter;
+  console.log(movesCounter);
+  moves.textContent = Math.floor(movesCounter/2);
   //rating with starts, test rating value
-  if(movesCounter > 20 && movesCounter <= 30){
+  if(movesCounter > 4 && movesCounter <= 8){
     star.item(0).remove();
-  } else if (movesCounter > 30 && movesCounter <= 40){
+  } else if(movesCounter > 8) {
     star.item(1).remove();
-  } else if (movesCounter > 40){
-    star.item(2).remove();
   }
+  currentRate = document.querySelector('.stars').innerHTML ;
+
 }
 
+//Timer
 let sec = document.querySelector('#sec');
 let min = document.querySelector('#min');
 let hour = document.querySelector('#hour');
-
-window.onload = function(){
-
-}
 
 let timer = setInterval(function(){
   sec.innerText ++;
@@ -174,6 +150,30 @@ let timer = setInterval(function(){
   } , 1000);
 
 
+function isAlllMatched(card){
+  let numMatched = 0;
+   for(let cards of allCards){
+     //if all cards are matched
+     if(cards.classList.contains('match')){
+       numMatched ++;}
+     }
+     console.log('number of mached cards ' + numMatched);
+     if(numMatched === 2){
+       setTimeout(function(){document.body.innerHTML = `<div class="win"><h1>Congrats, you just won the game!</h1><h3>with ${movesCounter} moves ${currentRate} </br> ${hour.innerText}h${min.innerText}min${sec.innerText}sec</h3><button class="reload">Play again</button></div>`;
+       let reload = document.querySelector('.reload');
+       console.log(reload);
+       reload.onclick  = function(){
+         location.reload(true);
+       }
+     },500);
+
+
+   }
+
+
+}
+
+
 
 function reset(){
   //step moves to 0
@@ -181,14 +181,19 @@ function reset(){
     moves.textContent = movesCounter;
 
     //empty the open cards
+    allCards = document.querySelectorAll('.card');
     openCards = [];
 
     //rating
     document.querySelector('.stars').innerHTML = '';
     document.querySelector('.stars').insertAdjacentHTML('afterbegin','<li><i class="fa fa-star"></i></li><li><i class="fa fa-star"></i></li><li><i class="fa fa-star"></i></li>');
+    star = document.querySelectorAll('.stars > li');
 
-    clearInterval(timer);
+    //timer
+    //clearInterval(timer);
     sec.innerText= 0;
     min.innerText= 0;
     hour.innerText= 0;
+
+    cardOnClick();
 }
